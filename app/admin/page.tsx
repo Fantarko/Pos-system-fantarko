@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 type Stats = {
   totalOrders: number
@@ -15,6 +16,7 @@ type Stats = {
 
 export default function AdminPage() {
   const supabase = createClient()
+  const router = useRouter()
   const [stats, setStats] = useState<Stats>({
     totalOrders: 0,
     totalRevenue: 0,
@@ -25,7 +27,28 @@ export default function AdminPage() {
   })
   const [loading, setLoading] = useState(true)
   const [recentOrders, setRecentOrders] = useState<any[]>([])
+  
+        useEffect(() => {
+          checkAuth()
+          fetchStats()
+        }, [])
 
+        const checkAuth = async () => {
+          const { data: { user } } = await supabase.auth.getUser()
+          if (!user) {
+            router.push('/login')
+            return
+          }
+          const { data } = await supabase
+            .from('users')
+            .select('role')
+            .eq('id', user.id)
+            .single()
+
+          if (!data || data.role !== 'admin') {
+            router.push('/pos')
+          }
+        }
   useEffect(() => {
     fetchStats()
   }, [])

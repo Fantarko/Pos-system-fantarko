@@ -28,8 +28,13 @@ export async function proxy(request: NextRequest) {
     )){
         return NextResponse.redirect(new URL('/login', request.url))
     }
+               
+            if (user && request.nextUrl.pathname === '/login') {
+            return NextResponse.redirect(new URL('/pos', request.url))
+            }
+
     return supabaseResponse
 }
 export const config={
-    matcher: ['/pos/:path*','/admin/:path*']
+    matcher: ['/pos/:path*','/admin/:path*','/login']
 }
