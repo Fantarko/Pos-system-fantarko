@@ -6,6 +6,7 @@ export async function proxy(request: NextRequest) {
     request,
   });
 
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -25,48 +26,54 @@ export async function proxy(request: NextRequest) {
           });
 
           cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(name, value, options);
+            response.cookies.set(
+              name,
+              value,
+              options
+            );
           });
         },
       },
     }
   );
 
-      try {
-        const {
-      data: { user },
-    } = await supabase.auth.getUser();
+
+  // อ่าน session จาก cookie
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
 
-    if (!user) {
-      return NextResponse.redirect(
-        new URL("/login", request.url)
-      );
-}
+  const user = session?.user;
 
-    const pathname = request.nextUrl.pathname;
 
-    const isProtected =
-      pathname.startsWith("/pos") ||
-      pathname.startsWith("/admin");
+  const pathname = request.nextUrl.pathname;
 
-    // ไม่มี Session → ไป Login
-    if (!user && isProtected) {
-      return NextResponse.redirect(new URL("/login", request.url));
-    }
 
-    // Login แล้ว → ห้ามกลับหน้า Login
-    if (user && pathname === "/login") {
-      return NextResponse.redirect(new URL("/pos", request.url));
-    }
+  const isProtected =
+    pathname.startsWith("/pos") ||
+    pathname.startsWith("/admin");
 
-    return response;
-  } catch (err) {
-    console.error("Middleware Error:", err);
 
-    return NextResponse.redirect(new URL("/login", request.url));
+  // ยังไม่ได้ login แต่เข้า POS/Admin
+  if (!user && isProtected) {
+    return NextResponse.redirect(
+      new URL("/login", request.url)
+    );
   }
+
+
+  // Login แล้ว ห้ามกลับหน้า Login
+  if (user && pathname === "/login") {
+    return NextResponse.redirect(
+      new URL("/pos", request.url)
+    );
+  }
+
+
+  return response;
 }
+
 
 export const config = {
   matcher: [
