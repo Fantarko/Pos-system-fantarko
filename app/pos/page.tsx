@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/hooks/components/Navbar";
 import { toast } from 'sonner'
 import { useAuth } from "@/hooks/useAuth";
+import Loading from "@/hooks/components/Loading";
 
 type Product = {
   id: number;
@@ -122,6 +123,7 @@ export default function POSPage() {
       }
 
       clearCart();
+      
       router.push(`/pos/receipt/${order.id}`);
     } catch {
       alert("เกิดข้อผิดพลาด กรุณาลองใหม่");
@@ -153,7 +155,9 @@ export default function POSPage() {
       </div>
     );
   }
-
+      if (loading) {
+        return <Loading />;
+      }
   return (
     <main className="min-h-screen bg-slate-950 text-white">
       <div className="flex h-screen">
