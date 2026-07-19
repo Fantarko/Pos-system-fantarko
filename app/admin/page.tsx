@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 type Stats = {
   totalOrders: number;
@@ -23,6 +24,7 @@ type RecentOrder = {
 
 /** แสดงแดชบอร์ดผู้ดูแลพร้อมข้อมูลผู้ใช้และสถิติการขาย */
 export default function AdminPage() {
+  const { loading: authLoading } = useAuth('admin')
   const supabase = createClient();
   const router = useRouter();
   const [stats, setStats] = useState<Stats>({
@@ -104,7 +106,7 @@ export default function AdminPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-center">

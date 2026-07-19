@@ -4,6 +4,9 @@ import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { useCart } from "@/hooks/useCart";
 import { useRouter } from "next/navigation";
+import Navbar from "@/components/Navbar";
+import { toast } from 'sonner'
+import { useAuth } from "@/hooks/useAuth";
 
 type Product = {
   id: number;
@@ -26,6 +29,7 @@ type PaymentMethod = {
 
 /** แสดงหน้าขายสินค้า จัดการตะกร้า และบันทึกคำสั่งซื้อเมื่อชำระเงิน */
 export default function POSPage() {
+  const { loading: authLoading } = useAuth('staff')
   const supabase = createClient();
   const router = useRouter();
   const { cart, addItem, removeItem, clearCart, total } = useCart();
@@ -71,9 +75,15 @@ export default function POSPage() {
 
   /** สร้างคำสั่งซื้อ บันทึกรายการย่อย ตัดสต็อก และเปิดใบเสร็จ */
   const handleCheckout = async () => {
-    if (cart.length === 0) return alert("กรุณาเลือกสินค้า");
-    if (!selectedPayment) return alert("กรุณาเลือกวิธีชำระเงิน");
+     if (cart.length === 0) {
+    toast.error("กรุณาเลือกสินค้า");
+    return;
+  }
 
+  if (!selectedPayment) {
+    toast.error("กรุณาเลือกวิธีชำระเงิน");
+    return;
+  }
     setLoading(true);
     try {
       // สร้างออเดอร์
@@ -119,10 +129,23 @@ export default function POSPage() {
       setLoading(false);
     }
   };
+      // ฟังชั่นเพิ่มสินค้า
+      const handleAddItem = (product: Product) => {
+        const cartItem = cart.find(c => c.id === product.id)
+        const currentQty = cartItem?.quantity ?? 0
 
-  if (loadingData) {
+        if (currentQty >= product.quantity) {
+          toast.error(`${product.name} หมดแล้ว!`)
+          return
+        }
+        addItem(product)
+        toast.success(`เพิ่ม ${product.name} แล้ว`)
+      }
+
+  if (authLoading || loadingData) {
     return (
       <div className="min-h-screen bg-blue-950 flex items-center justify-center">
+        <Navbar type="pos" />
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-blue-300">กำลังโหลดข้อมูล...</p>
@@ -173,7 +196,7 @@ export default function POSPage() {
             {filteredProducts.map((product) => (
               <button
                 key={product.id}
-                onClick={() => addItem(product)}
+                onClick={() => handleAddItem(product)}
                 className="group rounded-2xl border border-slate-800 bg-slate-900 p-4 text-left transition-all duration-200 hover:-translate-y-1 hover:border-blue-500 hover:bg-slate-800 active:scale-95"
               >
                 {/* Product Image */}
