@@ -38,7 +38,6 @@ export async function proxy(request: NextRequest) {
   );
 
 
-  // อ่าน session จาก cookie
   const {
     data: { session },
   } = await supabase.auth.getSession();
@@ -46,28 +45,103 @@ export async function proxy(request: NextRequest) {
 
   const user = session?.user;
 
-
   const pathname = request.nextUrl.pathname;
 
 
-  const isProtected =
-    pathname.startsWith("/pos") ||
+  const isPOS =
+    pathname.startsWith("/pos");
+
+  const isAdmin =
     pathname.startsWith("/admin");
 
+  const isLogin =
+    pathname === "/login";
 
-  // ยังไม่ได้ login แต่เข้า POS/Admin
-  if (!user && isProtected) {
+
+  // =========================
+  // ไม่ Login
+  // =========================
+
+  if (!user && (isPOS || isAdmin)) {
     return NextResponse.redirect(
       new URL("/login", request.url)
     );
   }
 
 
-  // Login แล้ว ห้ามกลับหน้า Login
-  if (user && pathname === "/login") {
+  if (!user) {
+    return response;
+  }
+
+
+
+  // =========================
+  // ดึง Role User
+  // =========================
+
+  const { data: profile } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+
+
+  const role = profile?.role;
+
+
+
+  // =========================
+  // STAFF เข้า POS ได้
+  // =========================
+
+  if (isPOS) {
+
+    if (
+      role !== "staff" &&
+      role !== "admin"
+    ) {
+      return NextResponse.redirect(
+        new URL("/", request.url)
+      );
+    }
+
+  }
+
+
+
+  // =========================
+  // ADMIN เท่านั้น
+  // =========================
+
+  if (isAdmin) {
+
+    if (role !== "admin") {
+      return NextResponse.redirect(
+        new URL("/", request.url)
+      );
+    }
+
+  }
+
+
+
+  // =========================
+  // Login แล้ว ห้ามกลับ Login
+  // =========================
+
+  if (isLogin) {
+
+    if (role === "staff" || role === "admin") {
+      return NextResponse.redirect(
+        new URL("/pos", request.url)
+      );
+    }
+
     return NextResponse.redirect(
-      new URL("/pos", request.url)
+      new URL("/", request.url)
     );
+
   }
 
 
@@ -81,4 +155,4 @@ export const config = {
     "/pos/:path*",
     "/admin/:path*",
   ],
-};
+};  
