@@ -147,7 +147,6 @@ export default function POSPage() {
   if (authLoading || loadingData) {
     return (
       <div className="min-h-screen bg-blue-950 flex items-center justify-center">
-        <Navbar type="pos" />
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-blue-300">กำลังโหลดข้อมูล...</p>
@@ -160,6 +159,7 @@ export default function POSPage() {
       }
   return (
     <main className="min-h-screen bg-slate-950 text-white">
+       <Navbar type="pos" />
       <div className="flex h-screen">
         {/* Left - Products */}
         <div className="flex flex-1 flex-col overflow-hidden p-6">
