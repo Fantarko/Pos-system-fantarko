@@ -61,88 +61,187 @@ export default function CustomerPage() {
     )
   }
 
-  return (
-    <main className="min-h-screen bg-blue-950 text-white">
+ return (
+  <main className="min-h-screen bg-slate-950 text-white">
 
-      {/* Header */}
-      <div className="bg-blue-900 border-b border-blue-800 px-6 py-4 flex justify-between items-center">
+    {/* Header */}
+    <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-950/80 backdrop-blur-xl">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-5">
+
         <div>
-          <h1 className="text-2xl font-bold text-white">🏪 ร้านของเรา</h1>
-          <p className="text-blue-400 text-sm">สินค้าคุณภาพดี ราคาเป็นมิตร</p>
+          <h1 className="text-3xl font-extrabold tracking-tight">
+            🏪 ร้านของเรา
+          </h1>
+
+          <p className="mt-1 text-sm text-slate-400">
+            สินค้าคุณภาพดี • ราคาเป็นมิตร
+          </p>
         </div>
+
         <Link
           href="/points"
-          className="bg-yellow-500 hover:bg-yellow-400 text-black font-bold px-4 py-2 rounded-xl text-sm transition"
+          className="rounded-xl bg-gradient-to-r from-yellow-400 to-amber-500 px-5 py-3 text-sm font-bold text-black transition hover:scale-105 hover:shadow-lg hover:shadow-yellow-500/30"
         >
           ⭐ เช็คแต้ม
         </Link>
+
       </div>
+    </header>
 
-      <div className="max-w-6xl mx-auto p-6">
+    <div className="mx-auto max-w-7xl p-6">
 
-        {/* โปรโมชั่น */}
-        {promotions.length > 0 && (
-          <section className="mb-8">
-            <h2 className="text-xl font-bold text-yellow-400 mb-4">🎁 โปรโมชั่นพิเศษ</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-              {promotions.map(promo => (
-                <div key={promo.id} className="bg-gradient-to-br from-yellow-900/50 to-orange-900/50 border border-yellow-700/50 rounded-2xl p-5">
-                  <p className="text-4xl mb-2">🎁</p>
-                  <h3 className="font-bold text-lg text-yellow-300">{promo.name}</h3>
-                  <p className="text-yellow-400 text-2xl font-bold mt-1">ลด {promo.discount}%</p>
-                  <p className="text-yellow-600 text-xs mt-2">
-                    ถึง {new Date(promo.end_date).toLocaleDateString('th-TH')}
-                  </p>
+      {/* Promotion */}
+      {promotions.length > 0 && (
+        <section className="mb-10">
+
+          <div className="mb-5 flex items-center justify-between">
+
+            <h2 className="text-2xl font-bold text-white">
+              🎁 โปรโมชั่น
+            </h2>
+
+            <span className="rounded-full bg-yellow-500/10 px-4 py-2 text-xs font-semibold text-yellow-400">
+              {promotions.length} โปรโมชั่น
+            </span>
+
+          </div>
+
+          <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+
+            {promotions.map((promo) => (
+
+              <div
+                key={promo.id}
+                className="rounded-3xl border border-yellow-500/20 bg-gradient-to-br from-yellow-500/10 via-orange-500/10 to-red-500/10 p-6 transition hover:-translate-y-1 hover:border-yellow-400 hover:shadow-xl hover:shadow-yellow-500/10"
+              >
+
+                <div className="mb-4 text-5xl">
+                  🎁
                 </div>
-              ))}
-            </div>
-          </section>
-        )}
 
-        {/* Search */}
+                <h3 className="text-xl font-bold text-white">
+                  {promo.name}
+                </h3>
+
+                <p className="mt-3 text-4xl font-extrabold text-yellow-400">
+                  {promo.discount}%
+                </p>
+
+                <p className="text-sm text-yellow-300">
+                  ส่วนลด
+                </p>
+
+                <div className="mt-6 border-t border-yellow-500/20 pt-4 text-sm text-slate-300">
+
+                  หมดเขต
+
+                  <span className="ml-2 font-semibold text-white">
+                    {new Date(promo.end_date).toLocaleDateString("th-TH")}
+                  </span>
+
+                </div>
+
+              </div>
+
+            ))}
+
+          </div>
+
+        </section>
+      )}
+
+      {/* Search */}
+      <div className="mb-6">
+
         <input
           type="text"
           value={search}
-          onChange={e => setSearch(e.target.value)}
+          onChange={(e) => setSearch(e.target.value)}
           placeholder="🔍 ค้นหาสินค้า..."
-          className="w-full bg-blue-900 border border-blue-700 text-white placeholder-blue-400 px-4 py-3 rounded-xl outline-none focus:border-blue-400 transition mb-4"
+          className="w-full rounded-2xl border border-slate-700 bg-slate-900 px-5 py-4 text-white placeholder:text-slate-500 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20"
         />
 
-        {/* Category */}
-        <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
-          {['ทั้งหมด', ...categories].map(cat => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition ${
-                selectedCategory === cat
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-blue-900 text-blue-300 hover:bg-blue-800'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+      </div>
 
-        {/* สินค้า */}
-        <section>
-          <h2 className="text-xl font-bold text-blue-200 mb-4">📦 สินค้าทั้งหมด</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {filtered.map(product => (
-              <div key={product.id} className="bg-blue-900 border border-blue-800 rounded-2xl p-4 hover:bg-blue-800 transition">
-                <div className="bg-blue-800 rounded-xl h-20 flex items-center justify-center text-3xl mb-3">
-                  🛍️
-                </div>
-                <p className="font-semibold text-sm truncate">{product.name}</p>
-                <p className="text-blue-400 text-xs mt-1">{product.categories?.name}</p>
-                <p className="text-blue-300 font-bold mt-2">{product.price.toFixed(2)} ฿</p>
-              </div>
-            ))}
-          </div>
-        </section>
+      {/* Category */}
+      <div className="mb-8 flex gap-3 overflow-x-auto pb-2">
+
+        {["ทั้งหมด", ...categories].map((cat) => (
+
+          <button
+            key={cat}
+            onClick={() => setSelectedCategory(cat)}
+            className={`rounded-full px-5 py-3 text-sm font-semibold whitespace-nowrap transition ${
+              selectedCategory === cat
+                ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                : "bg-slate-900 text-slate-300 border border-slate-700 hover:border-blue-500 hover:bg-slate-800"
+            }`}
+          >
+            {cat}
+          </button>
+
+        ))}
 
       </div>
-    </main>
-  )
+
+      {/* Products */}
+      <section>
+
+        <div className="mb-6 flex items-center justify-between">
+
+          <h2 className="text-2xl font-bold">
+            📦 สินค้าทั้งหมด
+          </h2>
+
+          <span className="rounded-full bg-blue-500/10 px-4 py-2 text-xs font-semibold text-blue-400">
+            {filtered.length} รายการ
+          </span>
+
+        </div>
+
+        <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+
+          {filtered.map((product) => (
+
+            <div
+              key={product.id}
+              className="group rounded-3xl border border-slate-800 bg-slate-900 p-5 transition duration-300 hover:-translate-y-1 hover:border-blue-500 hover:shadow-xl hover:shadow-blue-500/10"
+            >
+
+              <div className="mb-5 flex aspect-square items-center justify-center rounded-2xl bg-slate-800 text-5xl transition group-hover:bg-slate-700">
+                🛍️
+              </div>
+
+              <p className="text-xs uppercase tracking-wide text-slate-500">
+                {product.categories?.name}
+              </p>
+
+              <h3 className="mt-2 line-clamp-2 min-h-[48px] font-bold text-white">
+                {product.name}
+              </h3>
+
+              <div className="mt-5 flex items-center justify-between">
+
+                <span className="text-2xl font-bold text-emerald-400">
+                  ฿ {product.price.toFixed(2)}
+                </span>
+
+                <button className="rounded-xl bg-blue-600 px-3 py-2 text-xs font-bold text-white opacity-0 transition group-hover:opacity-100 hover:bg-blue-500">
+                  ดูสินค้า
+                </button>
+
+              </div>
+
+            </div>
+
+          ))}
+
+        </div>
+
+      </section>
+
+    </div>
+
+  </main>
+)
 }

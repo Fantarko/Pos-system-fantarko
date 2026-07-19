@@ -1,6 +1,6 @@
 "use client";
 
-import Loading from "@/components/Loading";
+import Loading from "@/hooks/components/Loading";
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 

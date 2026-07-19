@@ -15,7 +15,7 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-import Loading from "@/components/Loading";
+import Loading from "@/hooks/components/Loading";
 
 type DailySales = {
   date: string;
