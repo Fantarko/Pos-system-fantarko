@@ -154,9 +154,7 @@ export default function POSPage() {
       </div>
     );
   }
-      if (loading) {
-        return <Loading />;
-      }
+      
   return (
     <main className="min-h-screen bg-slate-950 text-white">
        <Navbar type="pos" />
