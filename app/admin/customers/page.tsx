@@ -18,7 +18,7 @@ export default function CustomersPage() {
   const supabase = createClient();
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
-  const [, setSaving] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [editCustomer, setEditCustomer] = useState<Customer | null>(null);
@@ -334,6 +334,186 @@ export default function CustomersPage() {
             </h2>
 
             {/* Form เดิมของคุณใส่ตรงนี้ได้ */}
+            {/* Modal */}
+{showModal && (
+  <div
+    className="
+    fixed
+    inset-0
+    z-50
+    flex
+    items-center
+    justify-center
+    bg-black/70
+    p-4
+    backdrop-blur-sm
+    "
+  >
+    <div
+      className="
+      w-full
+      max-w-md
+      rounded-2xl
+      border
+      border-slate-800
+      bg-slate-900
+      p-6
+      shadow-2xl
+      "
+    >
+
+      <h2 className="mb-6 text-xl font-bold">
+        {editCustomer
+          ? "✏️ แก้ไขลูกค้า"
+          : "+ เพิ่มลูกค้าใหม่"}
+      </h2>
+
+
+      <div className="flex flex-col gap-5">
+
+        {/* Name */}
+        <div>
+          <label className="mb-2 block text-sm text-slate-400">
+            ชื่อลูกค้า *
+          </label>
+
+          <input
+            value={form.name}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                name: e.target.value,
+              })
+            }
+            placeholder="เช่น สมชาย ใจดี"
+            className="
+            w-full
+            rounded-xl
+            border
+            border-slate-700
+            bg-slate-800
+            px-4
+            py-3
+            text-white
+            outline-none
+            transition
+            focus:border-blue-500
+            "
+          />
+        </div>
+
+
+        {/* Phone */}
+        <div>
+          <label className="mb-2 block text-sm text-slate-400">
+            เบอร์โทร *
+          </label>
+
+          <input
+            type="tel"
+            maxLength={10}
+            value={form.phone}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                phone: e.target.value.replace(/\D/g, ""),
+              })
+            }
+            placeholder="0812345678"
+            className="
+            w-full
+            rounded-xl
+            border
+            border-slate-700
+            bg-slate-800
+            px-4
+            py-3
+            text-white
+            outline-none
+            transition
+            focus:border-blue-500
+            "
+          />
+        </div>
+
+
+        {/* Points */}
+        <div>
+          <label className="mb-2 block text-sm text-slate-400">
+            คะแนนสะสม
+          </label>
+
+          <input
+            type="number"
+            value={form.points}
+            onChange={(e) =>
+              setForm({
+                ...form,
+                points: e.target.value,
+              })
+            }
+            placeholder="0"
+            className="
+            w-full
+            rounded-xl
+            border
+            border-slate-700
+            bg-slate-800
+            px-4
+            py-3
+            text-white
+            outline-none
+            transition
+            focus:border-blue-500
+            "
+          />
+        </div>
+
+
+      </div>
+
+
+      {/* Buttons */}
+      <div className="mt-6 flex gap-3">
+
+        <button
+          onClick={() => setShowModal(false)}
+          className="
+          flex-1
+          rounded-xl
+          bg-slate-800
+          py-3
+          text-slate-300
+          transition
+          hover:bg-slate-700
+          "
+        >
+          ยกเลิก
+        </button>
+
+
+        <button
+          onClick={handleSave}
+          className="
+          flex-1
+          rounded-xl
+          bg-blue-600
+          py-3
+          font-bold
+          text-white
+          transition
+          hover:bg-blue-500
+          "
+        >
+          บันทึก
+        </button>
+
+      </div>
+
+
+    </div>
+  </div>
+)}
           </div>
         </div>
       )}

@@ -310,7 +310,180 @@ export default function StaffPage() {
               {editStaff ? "✏️ แก้ไขพนักงาน" : "+ เพิ่มพนักงานใหม่"}
             </h2>
 
-            {/* form เดิมใส่ตรงนี้ได้ */}
+           <div className="flex flex-col gap-5">
+
+  {/* Name */}
+  <div>
+    <label className="mb-2 block text-sm text-slate-400">
+      ชื่อพนักงาน *
+    </label>
+
+    <input
+      value={form.name}
+      onChange={(e) =>
+        setForm({
+          ...form,
+          name: e.target.value,
+        })
+      }
+      placeholder="เช่น สมชาย ใจดี"
+      className="
+      w-full
+      rounded-xl
+      border border-slate-700
+      bg-slate-800
+      px-4 py-3
+      text-white
+      outline-none
+      transition
+      focus:border-blue-500
+      "
+    />
+  </div>
+
+
+  {/* Position */}
+  <div>
+    <label className="mb-2 block text-sm text-slate-400">
+      ตำแหน่ง
+    </label>
+
+    <select
+      value={form.staff_position}
+      onChange={(e) =>
+        setForm({
+          ...form,
+          staff_position: e.target.value,
+        })
+      }
+      className="
+      w-full
+      rounded-xl
+      border border-slate-700
+      bg-slate-800
+      px-4 py-3
+      text-white
+      outline-none
+      transition
+      focus:border-blue-500
+      "
+    >
+      <option value="พนักงาน">
+        พนักงาน
+      </option>
+
+      <option value="ผู้จัดการ">
+        ผู้จัดการ
+      </option>
+
+      <option value="admin">
+        Admin
+      </option>
+    </select>
+  </div>
+
+
+  {/* Phone */}
+  <div>
+    <label className="mb-2 block text-sm text-slate-400">
+      เบอร์โทร
+    </label>
+
+    <input
+      type="tel"
+      maxLength={10}
+      value={form.phone}
+      onChange={(e) =>
+        setForm({
+          ...form,
+          phone: e.target.value.replace(/\D/g, ""),
+        })
+      }
+      placeholder="0812345678"
+      className="
+      w-full
+      rounded-xl
+      border border-slate-700
+      bg-slate-800
+      px-4 py-3
+      text-white
+      outline-none
+      transition
+      focus:border-blue-500
+      "
+    />
+  </div>
+
+
+  {/* Salary */}
+  <div>
+    <label className="mb-2 block text-sm text-slate-400">
+      เงินเดือน
+    </label>
+
+    <input
+      type="number"
+      value={form.salary}
+      onChange={(e) =>
+        setForm({
+          ...form,
+          salary: e.target.value,
+        })
+      }
+      placeholder="15000"
+      className="
+      w-full
+      rounded-xl
+      border border-slate-700
+      bg-slate-800
+      px-4 py-3
+      text-white
+      outline-none
+      transition
+      focus:border-blue-500
+      "
+    />
+  </div>
+
+</div>
+
+
+{/* Buttons */}
+<div className="mt-6 flex gap-3">
+
+  <button
+    onClick={() => setShowModal(false)}
+    className="
+    flex-1
+    rounded-xl
+    bg-slate-800
+    py-3
+    text-slate-300
+    transition
+    hover:bg-slate-700
+    "
+  >
+    ยกเลิก
+  </button>
+
+
+  <button
+    onClick={handleSave}
+    className="
+    flex-1
+    rounded-xl
+    bg-blue-600
+    py-3
+    font-bold
+    text-white
+    transition
+    hover:bg-blue-500
+    "
+  >
+    บันทึก
+  </button>
+
+</div>
           </div>
         </div>
       )}
