@@ -3,7 +3,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import Loading from "@/hooks/components/Loading";
+import Loading from "@/components/Loading";
 
 type Customer = {
   id: number;

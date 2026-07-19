@@ -4,10 +4,10 @@ import { createClient } from "@/lib/supabase/client";
 import { useEffect, useState } from "react";
 import { useCart } from "@/hooks/useCart";
 import { useRouter } from "next/navigation";
-import Navbar from "@/hooks/components/Navbar";
+import Navbar from "@/components/Navbar";
 import { toast } from 'sonner'
 import { useAuth } from "@/hooks/useAuth";
-import Loading from "@/hooks/components/Loading";
+import Loading from "@/components/Loading";
 
 type Product = {
   id: number;

@@ -1,9 +1,10 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextRequest, NextResponse } from "next/server";
 
-/** ซิงก์ session cookie ของ Supabase และส่งต่อคำขอไปยังเส้นทางที่ตรงกัน */
 export async function proxy(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request });
+  let response = NextResponse.next({
+    request,
+  });
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -13,36 +14,64 @@ export async function proxy(request: NextRequest) {
         getAll() {
           return request.cookies.getAll();
         },
+
         setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
-          );
-          supabaseResponse = NextResponse.next({ request });
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options),
-          );
+          cookiesToSet.forEach(({ name, value }) => {
+            request.cookies.set(name, value);
+          });
+
+          response = NextResponse.next({
+            request,
+          });
+
+          cookiesToSet.forEach(({ name, value, options }) => {
+            response.cookies.set(name, value, options);
+          });
         },
       },
-    },
+    }
   );
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
 
-  if (
-    !user &&
-    (request.nextUrl.pathname.startsWith("/pos") ||
-      request.nextUrl.pathname.startsWith("/admin"))
-  ) {
+      try {
+        const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+
+    if (!user) {
+      return NextResponse.redirect(
+        new URL("/login", request.url)
+      );
+}
+
+    const pathname = request.nextUrl.pathname;
+
+    const isProtected =
+      pathname.startsWith("/pos") ||
+      pathname.startsWith("/admin");
+
+    // ไม่มี Session → ไป Login
+    if (!user && isProtected) {
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+
+    // Login แล้ว → ห้ามกลับหน้า Login
+    if (user && pathname === "/login") {
+      return NextResponse.redirect(new URL("/pos", request.url));
+    }
+
+    return response;
+  } catch (err) {
+    console.error("Middleware Error:", err);
+
     return NextResponse.redirect(new URL("/login", request.url));
   }
-
-  if (user && request.nextUrl.pathname === "/login") {
-    return NextResponse.redirect(new URL("/pos", request.url));
-  }
-
-  return supabaseResponse;
 }
+
 export const config = {
-  matcher: ["/pos/:path*", "/admin/:path*", "/login"],
+  matcher: [
+    "/login",
+    "/pos/:path*",
+    "/admin/:path*",
+  ],
 };
