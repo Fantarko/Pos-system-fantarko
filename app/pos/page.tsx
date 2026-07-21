@@ -340,7 +340,7 @@ setPhone('')
           </div>
 
           {/* Cart Items */}
-          <div className="flex-1 overflow-y-auto p-5">
+         <div className="flex-1 overflow-y-auto p-5" style={{ maxHeight: 'calc(100vh - 400px)' }}>
             {cart.length === 0 ? (
               <div className="mt-16 text-center text-slate-500">
                 <div className="mb-3 text-4xl">🛒</div>
