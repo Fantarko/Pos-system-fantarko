@@ -29,12 +29,17 @@ export default function PromotionsPage() {
   const [showModal, setShowModal] = useState(false);
   const [editPromotion, setEditPromotion] = useState<Promotion | null>(null);
   const [selectedProducts, setSelectedProducts] = useState<number[]>([]);
+  const [searchProduct, setSearchProduct] = useState("");
   const [form, setForm] = useState({
     name: "",
     discount: "",
     start_date: "",
     end_date: "",
   });
+
+    const filteredProducts = products.filter((product) =>
+        product.name.toLowerCase().includes(searchProduct.toLowerCase())
+      );
 
   useEffect(() => {
     fetchData();
@@ -410,7 +415,7 @@ export default function PromotionsPage() {
                     p-3
                   "
                   >
-                    {products.map((prod) => (
+                    {filteredProducts.map((prod) => (
                       <label
                         key={prod.id}
                         className="
@@ -423,6 +428,13 @@ export default function PromotionsPage() {
                         hover:text-blue-400
                       "
                       >
+                        <input
+                          type="text"
+                          placeholder="🔍 ค้นหาสินค้า..."
+                          value={searchProduct}
+                          onChange={(e) => setSearchProduct(e.target.value)}
+                          className="mb-3 w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 outline-none focus:border-blue-500"
+                        />
                         <input
                           type="checkbox"
                           checked={selectedProducts.includes(prod.id)}
