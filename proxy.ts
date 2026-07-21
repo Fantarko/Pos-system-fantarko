@@ -6,7 +6,6 @@ export async function proxy(request: NextRequest) {
     request,
   });
 
-
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -26,40 +25,27 @@ export async function proxy(request: NextRequest) {
           });
 
           cookiesToSet.forEach(({ name, value, options }) => {
-            response.cookies.set(
-              name,
-              value,
-              options
-            );
+            response.cookies.set(name, value, options);
           });
         },
       },
     }
   );
 
-
   const {
     data: { session },
   } = await supabase.auth.getSession();
-
 
   const user = session?.user;
 
   const pathname = request.nextUrl.pathname;
 
-
-  const isPOS =
-    pathname.startsWith("/pos");
-
-  const isAdmin =
-    pathname.startsWith("/admin");
-
-  const isLogin =
-    pathname === "/login";
-
+  const isPOS = pathname.startsWith("/pos");
+  const isAdmin = pathname.startsWith("/admin");
+  const isLogin = pathname === "/login";
 
   // =========================
-  // ไม่ Login
+  // ยังไม่ได้ Login
   // =========================
 
   if (!user && (isPOS || isAdmin)) {
@@ -68,70 +54,51 @@ export async function proxy(request: NextRequest) {
     );
   }
 
-
   if (!user) {
     return response;
   }
 
-
-
   // =========================
-  // ดึง Role User
+  // โหลด Role
   // =========================
 
-  const { data: profile } = await supabase
+  const { data: profile, error } = await supabase
     .from("users")
     .select("role")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
-
-
-  const role = profile?.role;
-
-
-
-  // =========================
-  // STAFF เข้า POS ได้
-  // =========================
-
-  if (isPOS) {
-
-    if (
-      role !== "staff" &&
-      role !== "admin"
-    ) {
-      return NextResponse.redirect(
-        new URL("/", request.url)
-      );
-    }
-
+  if (error) {
+    console.error("Role Error:", error);
   }
 
+  const role = profile?.role ?? "customer";
 
+  // =========================
+  // STAFF / ADMIN เข้า POS ได้
+  // =========================
+
+  if (isPOS && role !== "staff" && role !== "admin") {
+    return NextResponse.redirect(
+      new URL("/", request.url)
+    );
+  }
 
   // =========================
   // ADMIN เท่านั้น
   // =========================
 
-  if (isAdmin) {
-
-    if (role !== "admin") {
-      return NextResponse.redirect(
-        new URL("/", request.url)
-      );
-    }
-
+  if (isAdmin && role !== "admin") {
+    return NextResponse.redirect(
+      new URL("/", request.url)
+    );
   }
-
-
 
   // =========================
   // Login แล้ว ห้ามกลับ Login
   // =========================
 
   if (isLogin) {
-
     if (role === "staff" || role === "admin") {
       return NextResponse.redirect(
         new URL("/pos", request.url)
@@ -141,13 +108,10 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(
       new URL("/", request.url)
     );
-
   }
-
 
   return response;
 }
-
 
 export const config = {
   matcher: [
@@ -155,4 +119,4 @@ export const config = {
     "/pos/:path*",
     "/admin/:path*",
   ],
-};  
+};

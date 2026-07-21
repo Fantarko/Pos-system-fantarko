@@ -29,25 +29,44 @@ export default function LoginPage() {
 
   // Login ด้วย Email
   /** ตรวจสอบข้อมูลอีเมล/รหัสผ่าน แล้วพาผู้ใช้ไปยังหน้าขายเมื่อสำเร็จ */
-  const handleEmailLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
+        const handleEmailLogin = async (e: React.FormEvent) => {
+          e.preventDefault();
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+          setLoading(true);
+          setError("");
 
-    if (error) {
-      setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
-      setLoading(false);
-      return;
-    }
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
 
-    router.push("/pos");
-    setLoading(false);
-  };
+          if (error) {
+            setError("อีเมลหรือรหัสผ่านไม่ถูกต้อง");
+            setLoading(false);
+            return;
+          }
+
+          // อ่าน Role
+          const { data: profile, error: roleError } = await supabase
+            .from("users")
+            .select("role")
+            .eq("id", data.user.id)
+            .maybeSingle();
+
+          if (roleError) {
+            console.error(roleError);
+          }
+
+          const role = profile?.role ?? "customer";
+
+          if (role === "admin" || role === "staff") {
+            router.replace("/pos");
+          } else {
+            router.replace("/");
+          }
+
+          router.refresh();
+        };
 
   return (
     <main className="min-h-screen bg-slate-950 flex items-center justify-center px-4 py-8">

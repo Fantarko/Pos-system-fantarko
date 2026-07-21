@@ -17,34 +17,24 @@ export function useAuth(requiredRole?: 'staff' | 'admin') {
     try {
       setLoading(true)
 
-      // ตรวจสอบ Session
       const {
         data: { user },
         error: authError,
       } = await supabase.auth.getUser()
 
-      if (authError) {
-        console.error('Auth Error:', authError)
+      if (authError || !user) {
         router.replace('/login')
         return
       }
 
-      if (!user) {
-        router.replace('/login')
-        return
-      }
-
-      // โหลด Role
       const { data, error } = await supabase
         .from('users')
         .select('role')
         .eq('id', user.id)
-        .single()
+        .maybeSingle()
 
       if (error) {
         console.error('Role Error:', error)
-        router.replace('/login')
-        return
       }
 
       const userRole = (data?.role ?? 'customer') as UserRole
@@ -70,19 +60,7 @@ export function useAuth(requiredRole?: 'staff' | 'admin') {
   }, [requiredRole, router, supabase])
 
   useEffect(() => {
-    let mounted = true
-
-    const init = async () => {
-      await checkAuth()
-
-      if (!mounted) return
-    }
-
-    init()
-
-    return () => {
-      mounted = false
-    }
+    checkAuth()
   }, [checkAuth])
 
   return {

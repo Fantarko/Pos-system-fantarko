@@ -33,10 +33,8 @@ export async function GET(request: Request) {
     }
   );
 
-
-  const { data, error } =
-    await supabase.auth.exchangeCodeForSession(code);
-
+  // แลก Code เป็น Session
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
   if (error) {
     console.error("OAuth session error:", error);
@@ -46,11 +44,56 @@ export async function GET(request: Request) {
     );
   }
 
+  const user = data.user;
 
-  console.log("Login success:", data.user?.email);
+  if (!user) {
+    return NextResponse.redirect(
+      new URL("/login?error=no_user", request.url)
+    );
+  }
 
+  // สร้างข้อมูลผู้ใช้ครั้งแรก (ถ้ายังไม่มี)
+  const { error: upsertError } = await supabase
+    .from("users")
+    .upsert(
+      {
+        id: user.id,
+        email: user.email,
+        role: "customer",
+      },
+      {
+        onConflict: "id",
+      }
+    );
 
+  if (upsertError) {
+    console.error("Upsert user error:", upsertError);
+  }
+
+  // อ่าน Role ล่าสุด
+  const { data: profile, error: roleError } = await supabase
+    .from("users")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  if (roleError) {
+    console.error("Role error:", roleError);
+  }
+
+  const role = profile?.role ?? "customer";
+
+  console.log(`Login success: ${user.email} (${role})`);
+
+  // Redirect ตาม Role
+  if (role === "admin" || role === "staff") {
+    return NextResponse.redirect(
+      new URL("/pos", request.url)
+    );
+  }
+
+  // Customer → หน้าแรก (/)
   return NextResponse.redirect(
-    new URL("/pos", request.url)
+    new URL("/", request.url)
   );
 }
