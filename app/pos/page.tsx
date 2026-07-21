@@ -285,9 +285,9 @@ setPhone('')
         </div>
 
         {/* Right — ตะกร้า */}
-        <div className="w-full lg:w-80 xl:w-96 bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col max-h-screen lg:max-h-full">
+        <div className="w-full lg:w-80 xl:w-96 bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col h-screen overflow-hidden">
           {/* ค้นหาสมาชิก */}
-<div className="p-5 border-b border-slate-800">
+      <div className="p-5 border-b border-slate-800 flex-shrink-0">
   <p className="text-sm text-slate-400 mb-3">👤 ค้นหาสมาชิก</p>
   <div className="flex gap-2">
     <input
@@ -340,7 +340,7 @@ setPhone('')
           </div>
 
           {/* Cart Items */}
-         <div className="flex-1 overflow-y-auto p-5" style={{ maxHeight: 'calc(100vh - 400px)' }}>
+         <div className="flex-1 overflow-y-auto min-h-0 p-5">
             {cart.length === 0 ? (
               <div className="mt-16 text-center text-slate-500">
                 <div className="mb-3 text-4xl">🛒</div>
@@ -396,7 +396,7 @@ setPhone('')
 
           {/* Payment */}
 
-          <div className="border-t border-slate-800 p-5">
+         <div className="border-t border-slate-800 p-5 flex-shrink-0">
             {/* Payment Method */}
             <p className="mb-3 text-sm text-slate-400">วิธีชำระเงิน</p>
 
