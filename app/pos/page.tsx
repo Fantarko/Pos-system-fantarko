@@ -27,7 +27,12 @@ type PaymentMethod = {
   id: number;
   name: string;
 };
-
+type Customer = {
+  id: number
+  name: string
+  phone: string
+  points: number
+}
 /** แสดงหน้าขายสินค้า จัดการตะกร้า และบันทึกคำสั่งซื้อเมื่อชำระเงิน */
 export default function POSPage() {
   const { loading: authLoading } = useAuth('staff')
@@ -43,6 +48,9 @@ export default function POSPage() {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
 
+  const [customer, setCustomer] = useState<Customer | null>(null)
+  const [phone, setPhone] = useState('')
+  const [searchingCustomer, setSearchingCustomer] = useState(false)
   /** โหลดสินค้า หมวดหมู่ และช่องทางชำระเงินที่พร้อมใช้งาน */
   async function fetchData() {
     setLoadingData(true);
@@ -74,6 +82,33 @@ export default function POSPage() {
     return matchCategory && matchSearch;
   });
 
+      // หาลูกค้าจากเบอร์โทร
+    const handleSearchCustomer = async () => {
+      if (!phone || phone.length !== 10) {
+        toast.error('กรุณากรอกเบอร์โทร 10 หลัก')
+        return
+      }
+      setSearchingCustomer(true)
+      const { data } = await supabase
+        .from('customers')
+        .select('*')
+        .eq('phone', phone)
+        .single()
+
+      if (data) {
+        setCustomer(data)
+        toast.success(`พบสมาชิก ${data.name} แต้ม ${data.points}`)
+      } else {
+        setCustomer(null)
+        toast.error('ไม่พบสมาชิก')
+      }
+      setSearchingCustomer(false)
+    }
+
+    // คำนวณแต้มที่ได้รับ 100 บาท = 3 แต้ม
+    const calculatePoints = (total: number) => {
+      return Math.floor(total / 100) * 3
+    }
   /** สร้างคำสั่งซื้อ บันทึกรายการย่อย ตัดสต็อก และเปิดใบเสร็จ */
   const handleCheckout = async () => {
      if (cart.length === 0) {
@@ -121,7 +156,19 @@ export default function POSPage() {
             .eq("id", c.id);
         }
       }
+      // เพิ่มแต้มลูกค้า
+    if (customer) {
+      const earnedPoints = calculatePoints(total)
+      await supabase
+        .from('customers')
+        .update({ points: customer.points + earnedPoints })
+        .eq('id', customer.id)
+      toast.success(`เพิ่ม ${earnedPoints} แต้มให้ ${customer.name}`)
+    }
 
+    clearCart()
+setCustomer(null)
+setPhone('')
       clearCart();
       
       router.push(`/pos/receipt/${order.id}`);
@@ -158,9 +205,9 @@ export default function POSPage() {
   return (
     <main className="min-h-screen bg-slate-950 text-white">
        <Navbar type="pos" />
-      <div className="flex h-screen">
+      <div className="flex flex-col lg:flex-row min-h-screen">
         {/* Left - Products */}
-        <div className="flex flex-1 flex-col overflow-hidden p-6">
+       <div className="flex flex-1 flex-col overflow-hidden p-4 lg:p-6">
           {/* Search */}
           <div className="mb-6">
             <label className="mb-2 block text-sm font-medium text-slate-300">
@@ -238,7 +285,52 @@ export default function POSPage() {
         </div>
 
         {/* Right — ตะกร้า */}
-        <div className="w-80 xl:w-96 bg-slate-900 border-l border-slate-800 flex flex-col">
+        <div className="w-full lg:w-80 xl:w-96 bg-slate-900 border-t lg:border-t-0 lg:border-l border-slate-800 flex flex-col max-h-screen lg:max-h-full">
+          {/* ค้นหาสมาชิก */}
+<div className="p-5 border-b border-slate-800">
+  <p className="text-sm text-slate-400 mb-3">👤 ค้นหาสมาชิก</p>
+  <div className="flex gap-2">
+    <input
+      type="tel"
+      value={phone}
+      onChange={e => setPhone(e.target.value)}
+      onKeyDown={e => e.key === 'Enter' && handleSearchCustomer()}
+      placeholder="เบอร์โทร 10 หลัก"
+      maxLength={10}
+      className="flex-1 rounded-xl border border-slate-700 bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500 outline-none focus:border-blue-500 transition"
+    />
+    <button
+      onClick={handleSearchCustomer}
+      disabled={searchingCustomer}
+      className="rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-50 px-3 py-2 text-sm font-semibold text-white transition"
+    >
+      {searchingCustomer ? '...' : 'ค้นหา'}
+    </button>
+  </div>
+
+      {/* แสดงข้อมูลลูกค้า */}
+      {customer && (
+        <div className="mt-3 rounded-xl border border-green-700/50 bg-green-900/20 p-3">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-sm font-semibold text-green-400">{customer.name}</p>
+              <p className="text-xs text-green-600 mt-1">แต้มปัจจุบัน {customer.points} แต้ม</p>
+            </div>
+            <div className="text-right">
+              <p className="text-xs text-green-600">จะได้รับ</p>
+              <p className="text-lg font-bold text-yellow-400">+{calculatePoints(total)} แต้ม</p>
+            </div>
+          </div>
+          <button
+
+        onClick={() => { setCustomer(null); setPhone('') }}
+        className="mt-2 text-xs text-slate-500 hover:text-red-400 transition"
+      >
+        ✕ ยกเลิกสมาชิก
+      </button>
+    </div>
+  )}
+</div>
           <div className="p-5 border-b border-slate-800">
             <h2 className="text-lg font-semibold text-white">
               🛒 รายการสินค้า
