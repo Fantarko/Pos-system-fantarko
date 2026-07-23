@@ -292,34 +292,37 @@ export default function PromotionsPage() {
         </div>
       </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div
-          className="
-          fixed inset-0 z-50
-          flex items-center justify-center
-          bg-black/60
-          p-4
-          backdrop-blur-sm
-        "
-        >
-          <div
-            className="
-            max-h-[90vh]
-            w-full
-            max-w-md
-            overflow-y-auto
-            rounded-2xl
-            border border-slate-800
-            bg-slate-900
-            p-6
-          "
-          >
-            <h2 className="mb-6 text-xl font-bold">
-              {editPromotion ? "✏️ แก้ไขโปรโมชั่น" : "+ เพิ่มโปรโมชั่นใหม่"}
+        {/* Modal */}
+    {showModal && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+        <div className="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-800 bg-slate-900 p-6">
+
+          {/* Header */}
+          <div className="mb-6">
+            <h2 className="text-2xl font-bold">
+              {editPromotion ? "✏️ แก้ไขโปรโมชั่น" : "🎁 เพิ่มโปรโมชั่นใหม่"}
             </h2>
 
-            <div className="flex flex-col gap-5">
+            <p className="mt-1 text-sm text-slate-400">
+              กำหนดข้อมูลโปรโมชั่นและเลือกสินค้าที่ต้องการเข้าร่วม
+            </p>
+          </div>
+
+          {/* ======================== */}
+          {/* ข้อมูลโปรโมชั่น */}
+          {/* ======================== */}
+
+          <div className="space-y-4">
+
+            <h3 className="border-b border-slate-800 pb-2 text-lg font-semibold">
+              ข้อมูลโปรโมชั่น
+            </h3>
+
+            <div>
+              <label className="mb-2 block text-sm text-slate-300">
+                ชื่อโปรโมชั่น
+              </label>
+
               <input
                 value={form.name}
                 onChange={(e) =>
@@ -328,19 +331,20 @@ export default function PromotionsPage() {
                     name: e.target.value,
                   })
                 }
-                placeholder="ชื่อโปรโมชั่น"
-                className="
-                rounded-xl
-                border border-slate-700
-                bg-slate-800
-                px-4 py-3
-                outline-none
-                focus:border-blue-500
-              "
+                placeholder="เช่น ลดหน้าฝน"
+                className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 outline-none transition focus:border-blue-500"
               />
+            </div>
+
+            <div>
+              <label className="mb-2 block text-sm text-slate-300">
+                ส่วนลด (%)
+              </label>
 
               <input
                 type="number"
+                min={0}
+                max={100}
                 value={form.discount}
                 onChange={(e) =>
                   setForm({
@@ -348,146 +352,138 @@ export default function PromotionsPage() {
                     discount: e.target.value,
                   })
                 }
-                placeholder="ส่วนลด %"
-                min="0"
-                max="100"
-                className="
-                rounded-xl
-                border border-slate-700
-                bg-slate-800
-                px-4 py-3
-                outline-none
-                focus:border-blue-500
-              "
+                placeholder="10"
+                className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 outline-none transition focus:border-blue-500"
               />
-
-              <input
-                type="datetime-local"
-                value={form.start_date}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    start_date: e.target.value,
-                  })
-                }
-                className="
-                rounded-xl
-                border border-slate-700
-                bg-slate-800
-                px-4 py-3
-                outline-none
-                focus:border-blue-500
-              "
-              />
-
-              <input
-                type="datetime-local"
-                value={form.end_date}
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    end_date: e.target.value,
-                  })
-                }
-                className="
-                rounded-xl
-                border border-slate-700
-                bg-slate-800
-                px-4 py-3
-                outline-none
-                focus:border-blue-500
-              "
-              />
-
-              {!editPromotion && (
-                <div>
-                  <p className="mb-2 text-sm text-slate-400">
-                    เลือกสินค้าในโปรโมชั่น
-                  </p>
-
-                  <div
-                    className="
-                    max-h-40
-                    overflow-y-auto
-                    rounded-xl
-                    border border-slate-700
-                    bg-slate-800
-                    p-3
-                  "
-                  >
-                    {filteredProducts.map((prod) => (
-                      <label
-                        key={prod.id}
-                        className="
-                        flex
-                        cursor-pointer
-                        items-center
-                        gap-3
-                        py-2
-                        text-sm
-                        hover:text-blue-400
-                      "
-                      >
-                        <input
-                          type="text"
-                          placeholder="🔍 ค้นหาสินค้า..."
-                          value={searchProduct}
-                          onChange={(e) => setSearchProduct(e.target.value)}
-                          className="mb-3 w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 outline-none focus:border-blue-500"
-                        />
-                        <input
-                          type="checkbox"
-                          checked={selectedProducts.includes(prod.id)}
-                          onChange={() => toggleProduct(prod.id)}
-                          className="accent-blue-500"
-                        />
-
-                        {prod.name}
-                      </label>
-                    ))}
-                  </div>
-
-                  <p className="mt-2 text-xs text-slate-500">
-                    เลือกแล้ว {selectedProducts.length} รายการ
-                  </p>
-                </div>
-              )}
             </div>
 
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={() => setShowModal(false)}
-                className="
-                flex-1
-                rounded-xl
-                bg-slate-800
-                py-3
-                text-slate-300
-                hover:bg-slate-700
-              "
-              >
-                ยกเลิก
-              </button>
+            <div className="grid grid-cols-2 gap-4">
 
-              <button
-                onClick={handleSave}
-                disabled={saving}
-                className="
-                flex-1
-                rounded-xl
-                bg-blue-600
-                py-3
-                font-bold
-                hover:bg-blue-500
-                disabled:opacity-50
-              "
-              >
-                {saving ? "กำลังบันทึก..." : "บันทึก"}
-              </button>
+              <div>
+                <label className="mb-2 block text-sm text-slate-300">
+                  วันที่เริ่ม
+                </label>
+
+                <input
+                  type="datetime-local"
+                  value={form.start_date}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      start_date: e.target.value,
+                    })
+                  }
+                  className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 outline-none transition focus:border-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm text-slate-300">
+                  วันที่สิ้นสุด
+                </label>
+
+                <input
+                  type="datetime-local"
+                  value={form.end_date}
+                  onChange={(e) =>
+                    setForm({
+                      ...form,
+                      end_date: e.target.value,
+                    })
+                  }
+                  className="w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 outline-none transition focus:border-blue-500"
+                />
+              </div>
+
             </div>
           </div>
+
+          {/* ======================== */}
+          {/* เลือกสินค้า */}
+          {/* ======================== */}
+
+          {!editPromotion && (
+            <div className="mt-8">
+
+              <h3 className="border-b border-slate-800 pb-2 text-lg font-semibold">
+                สินค้าในโปรโมชั่น
+              </h3>
+
+              <p className="mt-2 mb-4 text-sm text-slate-400">
+                เลือกสินค้าที่ต้องการเข้าร่วมโปรโมชั่น
+              </p>
+
+              <input
+                type="text"
+                value={searchProduct}
+                onChange={(e) => setSearchProduct(e.target.value)}
+                placeholder="🔍 ค้นหาสินค้า..."
+                className="mb-4 w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-3 outline-none transition focus:border-blue-500"
+              />
+
+              <div className="max-h-56 overflow-y-auto rounded-xl border border-slate-700 bg-slate-800 p-3">
+
+                {filteredProducts.length === 0 ? (
+                  <p className="py-8 text-center text-sm text-slate-400">
+                    ไม่พบสินค้า
+                  </p>
+                ) : (
+                  filteredProducts.map((prod) => (
+                    <label
+                      key={prod.id}
+                      className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-2 transition hover:bg-slate-700"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedProducts.includes(prod.id)}
+                        onChange={() => toggleProduct(prod.id)}
+                        className="h-4 w-4 accent-blue-500"
+                      />
+
+                      <span>{prod.name}</span>
+                    </label>
+                  ))
+                )}
+
+              </div>
+
+              <div className="mt-3 flex items-center justify-between text-sm">
+                <span className="text-slate-400">
+                  เลือกแล้ว
+                </span>
+
+                <span className="rounded-full bg-blue-600 px-3 py-1 font-semibold">
+                  {selectedProducts.length} รายการ
+                </span>
+              </div>
+
+            </div>
+          )}
+
+          {/* Footer */}
+
+          <div className="mt-8 flex gap-3 border-t border-slate-800 pt-6">
+
+            <button
+              onClick={() => setShowModal(false)}
+              className="flex-1 rounded-xl bg-slate-800 py-3 text-slate-300 transition hover:bg-slate-700"
+            >
+              ยกเลิก
+            </button>
+
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="flex-1 rounded-xl bg-blue-600 py-3 font-semibold transition hover:bg-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {saving ? "กำลังบันทึก..." : "💾 บันทึก"}
+            </button>
+
+          </div>
+
         </div>
-      )}
+      </div>
+)}
     </main>
   );
 }
