@@ -274,380 +274,98 @@ setLoading(false);
 
 
 if(authLoading || loadingData){
-
 return (
+  <main className="min-h-dvh bg-slate-950 text-white overflow-hidden">
+    <Navbar type="pos" />
 
-<div className="
-min-h-screen
-flex
-items-center
-justify-center
-bg-slate-950
-text-white
-">
+    <div className="flex flex-col lg:flex-row h-[calc(100dvh-56px)] sm:h-[calc(100dvh-64px)]">
+      {/* ================= PRODUCT ================= */}
+      <section className="flex-1 overflow-hidden p-2 sm:p-4 lg:p-5 flex flex-col min-h-0">
+        {/* Search */}
+        <div className="flex gap-2 mb-2 sm:mb-3">
+          <input
+            ref={searchRef}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && search) handleBarcode(search);
+            }}
+            placeholder="ค้นหาสินค้า / ยิงบาร์โค้ด"
+            className="
+              flex-1 h-10 sm:h-12 rounded-lg sm:rounded-xl
+              bg-slate-900 border border-slate-800
+              px-3 sm:px-4 text-xs sm:text-sm
+              outline-none focus:border-blue-500
+            "
+          />
 
-กำลังโหลด...
+          <button
+            onClick={() => setShowScanner(!showScanner)}
+            className="
+              h-10 w-10 sm:h-12 sm:w-12 rounded-lg sm:rounded-xl
+              bg-blue-600 flex items-center justify-center
+              text-lg sm:text-xl active:scale-95 shrink-0
+            "
+          >
+            📷
+          </button>
+        </div>
 
-</div>
+        {/* Scanner */}
+        {showScanner && (
+          <div className="mb-2 sm:mb-3 rounded-lg sm:rounded-xl overflow-hidden">
+            <BarcodeScanner onScan={handleBarcode} />
+          </div>
+        )}
 
-)
+        {/* Category */}
+        <div className="mb-2 sm:mb-3 overflow-x-auto">
+          <CategoryFilter
+            categories={["ทั้งหมด", ...categories.map((x) => x.name)]}
+            selected={selectedCategory}
+            onChange={setSelectedCategory}
+          />
+        </div>
 
-}
+        {/* Products */}
+        <div className="flex-1 overflow-y-auto pb-3 sm:pb-5 min-h-0">
+          <ProductGrid products={filteredProducts} onAdd={handleAddItem} />
+        </div>
+      </section>
 
+      {/* ================= CART ================= */}
+      <aside
+        className="
+          w-full lg:w-96
+          bg-slate-900
+          border-t lg:border-t-0 lg:border-l border-slate-800
+          flex flex-col
+          h-[55dvh] lg:h-auto lg:max-h-none
+          shrink-0
+        "
+      >
+        <div className="shrink-0">
+          <CustomerBox customer={customer} phone={phone} setPhone={setPhone} />
+        </div>
 
+        <div className="flex-1 overflow-y-auto min-h-0">
+          <CartPanel cart={cart} removeItem={removeItem} addItem={addItem} />
+        </div>
 
-return (
-
-<main
-className="
-min-h-dvh
-bg-slate-950
-text-white
-overflow-hidden
-"
->
-
-
-<Navbar type="pos"/>
-
-
-
-<div
-className="
-flex
-flex-col
-lg:flex-row
-h-[calc(100dvh-64px)]
-"
->
-
-
-
-{/* ================= PRODUCT ================= */}
-
-<section
-className="
-flex-1
-overflow-hidden
-p-3
-sm:p-5
-flex
-flex-col
-"
->
-
-
-{/* Search */}
-
-<div
-className="
-flex
-gap-2
-mb-3
-"
->
-
-
-<input
-
-ref={searchRef}
-
-value={search}
-
-onChange={
-e=>setSearch(e.target.value)
-}
-
-
-onKeyDown={
-e=>{
-
-if(e.key==="Enter" && search){
-
-handleBarcode(search)
-
-}
-
-}
+        <div className="shrink-0">
+          <PaymentBox
+            payments={paymentMethods}
+            selected={selectedPayment}
+            setSelected={setSelectedPayment}
+            total={total}
+            checkout={handleCheckout}
+            loading={loading}
+          />
+        </div>
+      </aside>
+    </div>
+  </main>
+);
 
 }
-
-
-placeholder="
-ค้นหาสินค้า / ยิงบาร์โค้ด
-"
-
-
-className="
-flex-1
-h-12
-rounded-xl
-bg-slate-900
-border
-border-slate-800
-px-4
-text-sm
-outline-none
-focus:border-blue-500
-"
-
-
-/>
-
-
-
-<button
-
-onClick={
-()=>setShowScanner(!showScanner)
-}
-
-
-className="
-h-12
-w-12
-rounded-xl
-bg-blue-600
-flex
-items-center
-justify-center
-text-xl
-active:scale-95
-"
-
->
-
-📷
-
-</button>
-
-
-</div>
-
-
-
-
-
-{/* Scanner */}
-
-{
-showScanner && (
-
-<div
-className="
-mb-3
-rounded-xl
-overflow-hidden
-"
->
-
-<BarcodeScanner
-
-onScan={handleBarcode}
-
-/>
-
-</div>
-
-)
-
-}
-
-
-
-
-
-
-{/* Category */}
-
-<div
-className="
-mb-3
-overflow-x-auto
-"
->
-
-<CategoryFilter
-
-categories={[
-"ทั้งหมด",
-...categories.map(x=>x.name)
-]}
-
-selected={selectedCategory}
-
-onChange={setSelectedCategory}
-
-/>
-
-
-</div>
-
-
-
-
-
-
-{/* Products */}
-
-<div
-className="
-flex-1
-overflow-y-auto
-pb-5
-"
->
-
-<ProductGrid
-
-products={filteredProducts}
-
-onAdd={handleAddItem}
-
-/>
-
-
-</div>
-
-
-
-</section>
-
-
-
-
-
-
-
-
-{/* ================= CART ================= */}
-
-
-<aside
-
-className="
-w-full
-lg:w-96
-
-bg-slate-900
-
-border-t
-lg:border-t-0
-lg:border-l
-
-border-slate-800
-
-flex
-flex-col
-
-max-h-[45dvh]
-
-lg:max-h-none
-
-"
-
->
-
-
-
-{/* Customer */}
-
-<div
-className="
-shrink-0
-"
->
-
-<CustomerBox
-
-customer={customer}
-
-phone={phone}
-
-setPhone={setPhone}
-
-/>
-
-
-</div>
-
-
-
-
-
-{/* Cart */}
-
-<div
-className="
-flex-1
-overflow-y-auto
-min-h-0
-"
->
-
-
-<CartPanel
-
-cart={cart}
-
-removeItem={removeItem}
-
-addItem={addItem}
-
-/>
-
-
-</div>
-
-
-
-
-
-
-
-{/* Payment */}
-
-<div
-className="
-shrink-0
-"
->
-
-
-<PaymentBox
-
-payments={paymentMethods}
-
-selected={selectedPayment}
-
-setSelected={setSelectedPayment}
-
-total={total}
-
-checkout={handleCheckout}
-
-loading={loading}
-
-/>
-
-
-
-</div>
-
-
-
-
-</aside>
-
-
-
-
-
-</div>
-
-
-</main>
-
-)
-
 }
