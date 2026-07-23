@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
+import { useMemo } from "react";
 
 import ProductGrid from "@/components/pos/ProductGrid";
 import CategoryFilter from "@/components/pos/CategoryFilter";
@@ -21,6 +22,7 @@ import type {
   PaymentMethod,
   Customer
 } from "@/types";
+import Loading from "@/components/Loading";
 
 
 export default function POSPage(){
@@ -62,45 +64,40 @@ const [showScanner,setShowScanner]=useState(false);
 
 
 
-useEffect(()=>{
+useEffect(() => {
+  async function load() {
+    try {
+      const [
+        { data: prod },
+        { data: cat },
+        { data: pay }
+      ] = await Promise.all([
+        supabase
+          .from("products")
+          .select("*,categories(name)")
+          .gt("quantity", 0),
 
-async function load(){
+        supabase
+          .from("categories")
+          .select("*"),
 
-const [
- {data:prod},
- {data:cat},
- {data:pay}
-]=await Promise.all([
+        supabase
+          .from("payment_methods")
+          .select("*")
+      ]);
 
-supabase
-.from("products")
-.select("*,categories(name)")
-.gt("quantity",0),
+      setProducts(prod ?? []);
+      setCategories(cat ?? []);
+      setPaymentMethods(pay ?? []);
+    } catch {
+      toast.error("โหลดข้อมูลไม่สำเร็จ");
+    } finally {
+      setLoadingData(false);
+    }
+  }
 
-
-supabase
-.from("categories")
-.select("*"),
-
-
-supabase
-.from("payment_methods")
-.select("*")
-
-]);
-
-
-setProducts(prod ?? []);
-setCategories(cat ?? []);
-setPaymentMethods(pay ?? []);
-
-setLoadingData(false);
-
-}
-
-load();
-
-},[]);
+  load();
+}, []);
 
 
 
@@ -149,43 +146,33 @@ handleAddItem(product);
 
 setSearch("");
 
-setTimeout(()=>{
-searchRef.current?.focus();
-},100);
+requestAnimationFrame(() => {
+  searchRef.current?.focus();
+});
 
 
 };
 
 
+const filteredProducts = useMemo(() => {
+  return products.filter((p) => {
+    const matchCategory =
+      selectedCategory === "ทั้งหมด" ||
+      p.categories?.name === selectedCategory;
 
-const filteredProducts=products.filter(p=>{
+    const matchSearch =
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.barcode?.includes(search);
 
-
-const matchCategory =
-selectedCategory==="ทั้งหมด" ||
-p.categories?.name===selectedCategory;
-
-
-
-const matchSearch =
-p.name
-.toLowerCase()
-.includes(search.toLowerCase())
-||
-p.barcode?.includes(search);
-
-
-
-return matchCategory && matchSearch;
-
-
-});
+    return matchCategory && matchSearch;
+  });
+}, [products, search, selectedCategory]);
 
 
 
 const handleCheckout=async()=>{
 
-
+if (loading) return;
 if(cart.length===0){
 
 toast.error("ไม่มีสินค้า");
@@ -226,21 +213,19 @@ if(error) throw error;
 
 
 
-await supabase
-.from("order_items")
-.insert(
+const { error: itemError } = await supabase
+  .from("order_items")
+  .insert(
+    cart.map(item => ({
+      order_id: order.id,
+      product_id: item.id,
+      quantity: item.quantity,
+      price: item.price,
+      discount: item.discount
+    }))
+  );
 
-cart.map(item=>({
-
-order_id:order.id,
-product_id:item.id,
-quantity:item.quantity,
-price:item.price,
-discount:item.discount
-
-}))
-
-);
+if (itemError) throw itemError;
 
 
 
@@ -248,7 +233,7 @@ clearCart();
 
 setCustomer(null);
 setPhone("");
-
+toast.success("ชำระเงินสำเร็จ");
 router.push(
 `/pos/receipt/${order.id}`
 );
@@ -271,9 +256,9 @@ setLoading(false);
 
 };
 
-
-
 if(authLoading || loadingData){
+    return(<Loading/>);
+}
 return (
   <main className="min-h-dvh bg-slate-950 text-white overflow-hidden">
     <Navbar type="pos" />
@@ -366,6 +351,4 @@ return (
     </div>
   </main>
 );
-
-}
 }
