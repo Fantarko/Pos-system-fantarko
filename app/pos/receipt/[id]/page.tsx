@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import AutoPrint from "@/components/AutoPrint";
 
 /** โหลดคำสั่งซื้อตามรหัสและแสดงใบเสร็จสำหรับพิมพ์หรือบันทึก */
 export default async function ReceiptPage({
@@ -26,6 +27,7 @@ export default async function ReceiptPage({
 
   return (
     <main className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-4">
+      <AutoPrint />
       <div className="w-full max-w-md">
         {/* Receipt Card */}
         <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900">
@@ -102,7 +104,7 @@ export default async function ReceiptPage({
           </div>
 
           {/* Actions */}
-          <div className="flex flex-col gap-3 p-6">
+          <div className="flex flex-col gap-3 p-6 print:hidden">
             <Link
               href="/pos"
               className="w-full rounded-xl bg-blue-600 py-3 text-center font-bold text-white transition hover:bg-blue-500"
@@ -120,7 +122,7 @@ export default async function ReceiptPage({
         </div>
 
         {/* Footer */}
-        <p className="mt-5 text-center text-xs text-slate-600">
+         <p className="mt-5 text-center text-xs text-slate-600 print:hidden">
           POS System v1.0 © 2026
         </p>
       </div>
