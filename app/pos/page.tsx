@@ -298,39 +298,54 @@ text-white
 
 return (
 
-<main className="
-min-h-screen
+<main
+className="
+min-h-dvh
 bg-slate-950
 text-white
-">
+overflow-hidden
+"
+>
 
 
 <Navbar type="pos"/>
 
 
 
-<div className="
+<div
+className="
 flex
 flex-col
 lg:flex-row
-min-h-screen
-">
+h-[calc(100dvh-64px)]
+"
+>
 
 
 
-{/* Product Area */}
+{/* ================= PRODUCT ================= */}
 
-<div className="
+<section
+className="
 flex-1
-p-6
-">
-
-
-<div className="
+overflow-hidden
+p-3
+sm:p-5
 flex
-gap-3
-mb-4
-">
+flex-col
+"
+>
+
+
+{/* Search */}
+
+<div
+className="
+flex
+gap-2
+mb-3
+"
+>
 
 
 <input
@@ -347,9 +362,9 @@ e=>setSearch(e.target.value)
 onKeyDown={
 e=>{
 
-if(e.key==="Enter"){
+if(e.key==="Enter" && search){
 
-handleBarcode(search);
+handleBarcode(search)
 
 }
 
@@ -359,16 +374,21 @@ handleBarcode(search);
 
 
 placeholder="
-ค้นหาสินค้า หรือ ยิง Barcode
+ค้นหาสินค้า / ยิงบาร์โค้ด
 "
 
 
 className="
 flex-1
-bg-slate-900
+h-12
 rounded-xl
-p-3
+bg-slate-900
+border
+border-slate-800
+px-4
+text-sm
 outline-none
+focus:border-blue-500
 "
 
 
@@ -378,12 +398,21 @@ outline-none
 
 <button
 
-onClick={()=>setShowScanner(!showScanner)}
+onClick={
+()=>setShowScanner(!showScanner)
+}
+
 
 className="
-bg-blue-600
-px-4
+h-12
+w-12
 rounded-xl
+bg-blue-600
+flex
+items-center
+justify-center
+text-xl
+active:scale-95
 "
 
 >
@@ -397,8 +426,20 @@ rounded-xl
 
 
 
+
+
+{/* Scanner */}
+
 {
 showScanner && (
+
+<div
+className="
+mb-3
+rounded-xl
+overflow-hidden
+"
+>
 
 <BarcodeScanner
 
@@ -406,11 +447,25 @@ onScan={handleBarcode}
 
 />
 
+</div>
+
 )
 
 }
 
 
+
+
+
+
+{/* Category */}
+
+<div
+className="
+mb-3
+overflow-x-auto
+"
+>
 
 <CategoryFilter
 
@@ -426,6 +481,22 @@ onChange={setSelectedCategory}
 />
 
 
+</div>
+
+
+
+
+
+
+{/* Products */}
+
+<div
+className="
+flex-1
+overflow-y-auto
+pb-5
+"
+>
 
 <ProductGrid
 
@@ -436,25 +507,56 @@ onAdd={handleAddItem}
 />
 
 
-
 </div>
 
 
 
+</section>
 
 
-{/* POS Side */}
 
-<div className="
+
+
+
+
+
+{/* ================= CART ================= */}
+
+
+<aside
+
+className="
 w-full
 lg:w-96
+
 bg-slate-900
-border-l
+
+border-t
+lg:border-t-0
+lg:border-l
+
 border-slate-800
+
 flex
 flex-col
-">
 
+max-h-[45dvh]
+
+lg:max-h-none
+
+"
+
+>
+
+
+
+{/* Customer */}
+
+<div
+className="
+shrink-0
+"
+>
 
 <CustomerBox
 
@@ -467,6 +569,22 @@ setPhone={setPhone}
 />
 
 
+</div>
+
+
+
+
+
+{/* Cart */}
+
+<div
+className="
+flex-1
+overflow-y-auto
+min-h-0
+"
+>
+
 
 <CartPanel
 
@@ -478,6 +596,22 @@ addItem={addItem}
 
 />
 
+
+</div>
+
+
+
+
+
+
+
+{/* Payment */}
+
+<div
+className="
+shrink-0
+"
+>
 
 
 <PaymentBox
@@ -499,6 +633,13 @@ loading={loading}
 
 
 </div>
+
+
+
+
+</aside>
+
+
 
 
 
