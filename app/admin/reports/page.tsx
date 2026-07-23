@@ -16,6 +16,12 @@ import {
   Area,
 } from "recharts";
 import Loading from "@/components/Loading";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
+
+import * as XLSX from "xlsx";
+import { saveAs } from "file-saver";
+
 
 type DailySales = {
   date: string;
@@ -129,6 +135,47 @@ export default function ReportsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+      function exportPDF() {
+        const doc = new jsPDF();
+
+        doc.setFontSize(18);
+        doc.text("Sales Report", 14, 20);
+
+        autoTable(doc, {
+          head: [["สินค้า", "ขายได้", "รายได้"]],
+          body: topProducts.map((p) => [
+            p.name,
+            p.total_sold,
+            p.revenue.toLocaleString(),
+          ]),
+        });
+
+        doc.save("sales-report.pdf");
+      }
+
+          function exportExcel() {
+      const data = topProducts.map((p) => ({
+        Product: p.name,
+        Sold: p.total_sold,
+        Revenue: p.revenue,
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(data);
+      const workbook = XLSX.utils.book_new();
+
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Sales");
+
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+
+      const file = new Blob([excelBuffer], {
+        type: "application/octet-stream",
+      });
+
+      saveAs(file, "sales-report.xlsx");
+    }
   if (loading) {
     return <Loading />;
   }
@@ -154,11 +201,11 @@ export default function ReportsPage() {
           </div>
 
           <div className="flex gap-3">
-            <button className="rounded-xl border border-slate-700 bg-slate-900 px-5 py-3 text-sm font-semibold transition hover:border-blue-500 hover:bg-slate-800">
+            <button onClick={exportPDF} className="rounded-xl border border-slate-700 bg-slate-900 px-5 py-3 text-sm font-semibold transition hover:border-blue-500 hover:bg-slate-800">
               📄 Export PDF
             </button>
 
-            <button className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold transition hover:bg-blue-500">
+            <button onClick={exportExcel} className="rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold transition hover:bg-blue-500">
               📊 Export Excel
             </button>
           </div>
