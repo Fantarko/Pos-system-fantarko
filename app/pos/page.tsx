@@ -1,7 +1,7 @@
 "use client";
 
 import { createClient } from "@/lib/supabase/client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "@/hooks/useCart";
 import { useRouter } from "next/navigation";
 import Navbar from "@/components/Navbar";
@@ -13,21 +13,23 @@ import CategoryFilter from "@/components/pos/CategoryFilter";
 import CustomerBox from "@/components/pos/CustomerBox";
 import CartPanel from "@/components/pos/CartPanel";
 import PaymentBox from "@/components/pos/PaymentBox";
+import BarcodeScanner from "@/components/pos/BarcodeScanner";
 
 import type {
- Product,
- Category,
- PaymentMethod,
- Customer
+  Product,
+  Category,
+  PaymentMethod,
+  Customer
 } from "@/types";
 
 
 export default function POSPage(){
 
-const supabase=createClient()
-const router=useRouter()
+const supabase=createClient();
+const router=useRouter();
 
-const {loading:authLoading}=useAuth("staff")
+const {loading:authLoading}=useAuth("staff");
+
 
 const {
  cart,
@@ -35,23 +37,28 @@ const {
  removeItem,
  clearCart,
  total
-}=useCart()
+}=useCart();
 
 
-const [products,setProducts]=useState<Product[]>([])
-const [categories,setCategories]=useState<Category[]>([])
-const [paymentMethods,setPaymentMethods]=useState<PaymentMethod[]>([])
+const searchRef = useRef<HTMLInputElement>(null);
 
-const [search,setSearch]=useState("")
-const [selectedCategory,setSelectedCategory]=useState("ทั้งหมด")
 
-const [selectedPayment,setSelectedPayment]=useState<number|null>(null)
+const [products,setProducts]=useState<Product[]>([]);
+const [categories,setCategories]=useState<Category[]>([]);
+const [paymentMethods,setPaymentMethods]=useState<PaymentMethod[]>([]);
 
-const [customer,setCustomer]=useState<Customer|null>(null)
-const [phone,setPhone]=useState("")
+const [search,setSearch]=useState("");
+const [selectedCategory,setSelectedCategory]=useState("ทั้งหมด");
 
-const [loading,setLoading]=useState(false)
-const [loadingData,setLoadingData]=useState(true)
+const [selectedPayment,setSelectedPayment]=useState<number|null>(null);
+
+const [customer,setCustomer]=useState<Customer|null>(null);
+const [phone,setPhone]=useState("");
+
+const [loading,setLoading]=useState(false);
+const [loadingData,setLoadingData]=useState(true);
+
+const [showScanner,setShowScanner]=useState(false);
 
 
 
@@ -80,41 +87,20 @@ supabase
 .from("payment_methods")
 .select("*")
 
-])
+]);
 
 
-setProducts(prod??[])
-setCategories(cat??[])
-setPaymentMethods(pay??[])
+setProducts(prod ?? []);
+setCategories(cat ?? []);
+setPaymentMethods(pay ?? []);
 
-setLoadingData(false)
+setLoadingData(false);
 
 }
 
-load()
+load();
 
-},[])
-
-
-
-const filteredProducts=products.filter(p=>{
-
-const category =
-selectedCategory==="ทั้งหมด" ||
-p.categories?.name===selectedCategory
-
-
-const keyword =
-p.name
-.toLowerCase()
-.includes(search.toLowerCase())
-||
-p.barcode?.includes(search)
-
-
-return category && keyword
-
-})
+},[]);
 
 
 
@@ -122,38 +108,102 @@ const handleAddItem=(product:Product)=>{
 
 const item=cart.find(
 x=>x.id===product.id
-)
+);
 
-if((item?.quantity??0)>=product.quantity){
 
-toast.error("สินค้าไม่พอ")
-return
+if((item?.quantity ?? 0) >= product.quantity){
+
+toast.error("สินค้าไม่พอ");
+return;
+
+}
+
+
+addItem(product);
+
+toast.success(
+`เพิ่ม ${product.name}`
+);
+
+};
+
+
+
+const handleBarcode=(code:string)=>{
+
+
+const product=products.find(
+p=>p.barcode===code.trim()
+);
+
+
+if(!product){
+
+toast.error("ไม่พบสินค้า");
+return;
 
 }
 
-addItem(product)
 
-}
+handleAddItem(product);
+
+setSearch("");
+
+setTimeout(()=>{
+searchRef.current?.focus();
+},100);
+
+
+};
+
+
+
+const filteredProducts=products.filter(p=>{
+
+
+const matchCategory =
+selectedCategory==="ทั้งหมด" ||
+p.categories?.name===selectedCategory;
+
+
+
+const matchSearch =
+p.name
+.toLowerCase()
+.includes(search.toLowerCase())
+||
+p.barcode?.includes(search);
+
+
+
+return matchCategory && matchSearch;
+
+
+});
 
 
 
 const handleCheckout=async()=>{
 
+
 if(cart.length===0){
-toast.error("ไม่มีสินค้า")
-return
+
+toast.error("ไม่มีสินค้า");
+return;
+
 }
 
 
 if(!selectedPayment){
 
-toast.error("เลือกช่องทางชำระเงิน")
-return
+toast.error("เลือกช่องทางชำระเงิน");
+return;
 
 }
 
 
-setLoading(true)
+setLoading(true);
+
 
 try{
 
@@ -168,10 +218,11 @@ status:"completed"
 
 })
 .select()
-.single()
+.single();
 
 
-if(error) throw error
+
+if(error) throw error;
 
 
 
@@ -189,39 +240,57 @@ discount:item.discount
 
 }))
 
-)
+);
 
 
 
-clearCart()
+clearCart();
 
-setCustomer(null)
-setPhone("")
-
+setCustomer(null);
+setPhone("");
 
 router.push(
 `/pos/receipt/${order.id}`
-)
+);
+
 
 
 }catch{
 
-toast.error("เกิดข้อผิดพลาด")
+toast.error(
+"เกิดข้อผิดพลาด"
+);
+
 
 }finally{
 
-setLoading(false)
+setLoading(false);
 
 }
 
 
-}
+};
 
 
 
-if(authLoading||loadingData){
+if(authLoading || loadingData){
 
-return <div>Loading...</div>
+return (
+
+<div className="
+min-h-screen
+flex
+items-center
+justify-center
+bg-slate-950
+text-white
+">
+
+กำลังโหลด...
+
+</div>
+
+)
 
 }
 
@@ -229,10 +298,15 @@ return <div>Loading...</div>
 
 return (
 
-<main className="min-h-screen bg-slate-950 text-white">
+<main className="
+min-h-screen
+bg-slate-950
+text-white
+">
 
 
 <Navbar type="pos"/>
+
 
 
 <div className="
@@ -243,13 +317,25 @@ min-h-screen
 ">
 
 
+
+{/* Product Area */}
+
 <div className="
 flex-1
 p-6
 ">
 
 
+<div className="
+flex
+gap-3
+mb-4
+">
+
+
 <input
+
+ref={searchRef}
 
 value={search}
 
@@ -257,16 +343,72 @@ onChange={
 e=>setSearch(e.target.value)
 }
 
-placeholder="ค้นหาสินค้า"
+
+onKeyDown={
+e=>{
+
+if(e.key==="Enter"){
+
+handleBarcode(search);
+
+}
+
+}
+
+}
+
+
+placeholder="
+ค้นหาสินค้า หรือ ยิง Barcode
+"
+
 
 className="
-w-full
+flex-1
 bg-slate-900
 rounded-xl
 p-3
+outline-none
 "
 
+
 />
+
+
+
+<button
+
+onClick={()=>setShowScanner(!showScanner)}
+
+className="
+bg-blue-600
+px-4
+rounded-xl
+"
+
+>
+
+📷
+
+</button>
+
+
+</div>
+
+
+
+{
+showScanner && (
+
+<BarcodeScanner
+
+onScan={handleBarcode}
+
+/>
+
+)
+
+}
 
 
 
@@ -294,7 +436,35 @@ onAdd={handleAddItem}
 />
 
 
+
 </div>
+
+
+
+
+
+{/* POS Side */}
+
+<div className="
+w-full
+lg:w-96
+bg-slate-900
+border-l
+border-slate-800
+flex
+flex-col
+">
+
+
+<CustomerBox
+
+customer={customer}
+
+phone={phone}
+
+setPhone={setPhone}
+
+/>
 
 
 
@@ -305,18 +475,6 @@ cart={cart}
 removeItem={removeItem}
 
 addItem={addItem}
-
-/>
-
-
-
-<CustomerBox
-
-customer={customer}
-
-phone={phone}
-
-setPhone={setPhone}
 
 />
 
@@ -337,6 +495,10 @@ checkout={handleCheckout}
 loading={loading}
 
 />
+
+
+
+</div>
 
 
 

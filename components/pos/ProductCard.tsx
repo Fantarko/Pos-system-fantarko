@@ -51,10 +51,10 @@ export default function ProductCard({
       <h3
         className="
           mt-2
-          min-h-[48px]
+          min-h-12
           font-semibold
         "
-      >
+        >
         {product.name}
       </h3>
 
